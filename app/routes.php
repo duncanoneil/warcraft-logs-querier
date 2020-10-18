@@ -14,8 +14,7 @@ return function (App $app) {
     });
 
     $app->get('/', function (Request $request, Response $response) {
-        $response->getBody()->write('Hello world!');
-        return $response;
+        return $this->get('view')->render($response, 'main.twig', []);
     });
 
     $app->group('/api', function (Group $group) {

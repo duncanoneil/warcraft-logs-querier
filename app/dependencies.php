@@ -8,6 +8,7 @@ use Monolog\Logger;
 use Monolog\Processor\UidProcessor;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
+use Slim\Views\Twig;
 
 return function (ContainerBuilder $containerBuilder) {
     $containerBuilder->addDefinitions([
@@ -33,6 +34,10 @@ return function (ContainerBuilder $containerBuilder) {
                 'base_uri' => $wclSettings['clientUrl'],
                 'timeout'  => 2.0,
             ]);
+        },
+        'view' => function (ContainerInterface $c) {
+            return Twig::create(__DIR__ . '/../templates',
+                ['cache' => false]);
         },
     ]);
 };
