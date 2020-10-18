@@ -5,23 +5,32 @@
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-
+        <link rel="stylesheet" href="//cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+        <script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+        <style>
+            .list-group-item { white-space:nowrap; }
+            .dropdown-menu { padding:0; border:0; }
+            .dataTables_wrapper { margin-top: 0.5em; width:100%; }
+        </style>
     </head>
     <body>
         <div class="container">
             <div class="row">
-                <div class="col-sm">
-                    <div class="btn-group" role="group" id="selectRaidButton" style="display: none">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="col-sm-8">
+                    <h1>Avalanche Raid Dashboard</h1>
+                </div>
+                <div class="col-sm-2">
+                    <div class="btn-group mt-2" role="group" id="selectRaidButton" style="display: none">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Select Raid
                         </button>
                         <div id="selectRaid" class="dropdown-menu" aria-labelledby="btnGroupDrop1">
                         </div>
                     </div>
                 </div>
-                <div class="col-sm">
-                    <div class="btn-group" role="group" id="selectFightButton" style="display: none">
-                        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="col-sm-2">
+                    <div class="btn-group mt-2" role="group" id="selectFightButton" style="display: none">
+                        <button id="btnGroupDrop1" type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Select Fight
                         </button>
                         <div id="selectFight" class="dropdown-menu" aria-labelledby="btnGroupDrop1">
@@ -30,25 +39,37 @@
                 </div>
             </div>
             <div class="row">
-                <div id="raidInfo">
-                    <h1></h1>
-                    <h2></h2>
+                <div id="raidInfo" class="col-sm-6">
+                    <span class="h3 title"></span> <span class="badge badge-secondary pull-right"></span>
                 </div>
             </div>
             <div class="row">
-                <div id="fightInfo" style="display:none">
+                <div id="fightTitle" class="col-sm-6">
+                    <span class="h5 title"></span> <span class="badge badge-secondary pull-right"></span>
                 </div>
+            </div>
+            <div class="row">
+                <table id="fightInfo" class="table table-striped mt-2">
+                    <thead class="thead-dark"><tr><th>Class</th><th>Name</th><th>Time to first cast</th></tr></thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
             </div>
         </div>
         <script>
             $( document ).ready(function() {
+                $('#fightInfo').DataTable();
+                $('#fightInfo_wrapper').hide();
                 $.ajax({
                     url: '/api/raids'
                 }).done(function(data) {
                     let $raidEle = $('#selectRaid');
                     $raidEle.empty();
                     for (const [key, value] of Object.entries(data.data)) {
-                        $raidEle.append( `<a class='raid list-group-item' data-code='${value.code}'>${value.code}: ${value.title} (${value.owner.name})</a>` );
+                        let date = new Date(value.startTime);
+                        let dateText = date.toLocaleDateString("en-GB")
+                        $raidEle.append( `<a class='raid list-group-item' data-code='${value.code}'>${dateText}: ${value.title}</a>` );
                     }
                     $('#selectRaidButton').show();
                 });
@@ -59,8 +80,10 @@
                     }).done(function(data) {
                         let $fightEle = $('#selectFight');
                         $fightEle.empty();
-                        $('#raidInfo h1').text(`${data.data.title}`)
-                        $('#raidInfo h2').text(`${data.data.code}`)
+                        let date = new Date(data.data.startTime);
+                        let dateText = date.toLocaleDateString("en-GB")
+                        $('#raidInfo .title').text(`${dateText}: ${data.data.title}`)
+                        $('#raidInfo .badge').text(`${data.data.code}`)
                         for (const [key, value] of Object.entries(data.data.fights)) {
                             $fightEle.append( `<a href='#' class='fight list-group-item' data-code='${data.data.code}' data-encounter='${value.encounterID}' data-start-time='${value.startTime}' data-end-time='${value.endTime}'>${value.id}: ${value.encounterID}</a>` );
                         }
@@ -69,15 +92,21 @@
                 });
 
                 $('#selectFight').on('click', 'a', function() {
+                    let encounterID = $(this).data('encounter');
                     $.ajax({
                         url: '/api/raids/' + $(this).data('code') + '/' + $(this).data('encounter') + '/' + $(this).data('startTime') + '/' + $(this).data('endTime')
                     }).done(function(data) {
-                        let $fightInfo = $('#fightInfo');
-                        $fightInfo.empty();
+                        $('#fightTitle .title').text(`Encounter: ${encounterID}`);
+                        let $fightInfo = $('#fightInfo').DataTable();
+                        $fightInfo.clear();
                         for (const [key, value] of Object.entries(data.data.players)) {
-                            $fightInfo.append( `<div class="player list-group-item row"><span class='name col-md-6'>${value.name}</span><span class='${value.class} col-md-3'>${value.class}</span><span class='firstActionSeconds col-md-3'>${value.firstActionSeconds} sec</span></div>` );
+                            $tr = $(document.createElement('tr'));
+                            $tr.html(`<td class='${value.class}'>${value.class}</td><td class='name'>${value.name}</td><td class='firstActionSeconds'>${value.firstActionSeconds} sec</td>`)
+                            // $fightInfo.find('tbody').append( $tr );
+                            $fightInfo.rows.add( $tr );
                         }
-                        $fightInfo.show();
+                        $fightInfo.draw();
+                        $('#fightInfo_wrapper').show();
                     });
                 });
             });

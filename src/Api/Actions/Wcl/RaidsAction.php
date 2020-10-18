@@ -20,6 +20,7 @@ query {
             data {
                 code
                 title
+                startTime
                 zone {
                     id
                     name

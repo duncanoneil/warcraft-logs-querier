@@ -20,6 +20,7 @@ query ($code: String) {
         report(code: $code) {
             code
             title
+            startTime
             fights(killType: Kills) {
                 id
                 encounterID
