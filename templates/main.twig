@@ -114,6 +114,7 @@
                             $fightEle.append( `<a href='#' class='fight list-group-item' data-code='${data.data.code}' data-encounter='${value.encounterID}' data-start-time='${value.startTime}' data-end-time='${value.endTime}'>${value.id}: ${lookupBossName(value.encounterID)}</a>` );
                         }
                         let $raidPlayers = $('#raidPlayers');
+                        $raidPlayers.empty();
                         for (const [key, value] of Object.entries(data.data.rankedCharacters)) {
                             $raidPlayers.append( `<div class='text-center class-block class-${getClassName(value.classID).toLowerCase()}' >${value.name}</div>` );
                         }
