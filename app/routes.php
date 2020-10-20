@@ -20,6 +20,6 @@ return function (App $app) {
     $app->group('/api', function (Group $group) {
         $group->get('/raids', Wcl\RaidsAction::class);
         $group->get('/raids/{code}', Wcl\RaidFightsAction::class);
-        $group->get('/raids/{code}/{encounterID}/{startTime}/{endTime}', Wcl\PlayersInRaidAction::class);
+        $group->get('/raids/{code}/{encounterID}/{startTime}/{endTime}', Wcl\PlayersInFightAction::class);
     });
 };

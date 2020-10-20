@@ -7,7 +7,7 @@ use Fig\Http\Message\StatusCodeInterface as Code;
 use Psr\Http\Message\ResponseInterface as Response;
 
 
-class PlayersInRaidAction extends WclAction
+class PlayersInFightAction extends WclAction
 {
     /**
      * {@inheritdoc}

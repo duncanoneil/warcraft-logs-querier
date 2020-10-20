@@ -21,11 +21,17 @@ query ($code: String) {
             code
             title
             startTime
+            endTime
             fights(killType: Kills) {
                 id
                 encounterID
                 startTime
                 endTime
+            }
+            rankedCharacters {
+                id 
+                classID
+                name 
             }
         }
     }

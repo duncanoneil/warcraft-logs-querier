@@ -11,6 +11,25 @@
             .list-group-item { white-space:nowrap; }
             .dropdown-menu { padding:0; border:0; }
             .dataTables_wrapper { margin-top: 0.5em; width:100%; }
+            #raidPlayers { justify-content: space-between; }
+            .class-block {
+                flex: 0 0 19%;
+                max-width: 19%;
+                margin: 0.5% 0;
+                height: 40px;
+                line-height: 40px;
+                font-weight: bold;
+                background-repeat: no-repeat;
+                background-size: contain;
+            }
+            .class-druid { background-color: rgb(100%,49%,4%); background-image: url('/img/druid.png'); }
+            .class-hunter { background-color: rgb(67%,83%,45%); background-image: url('/img/hunter.png'); }
+            .class-mage { background-color: rgb(41%,80%,94%); background-image: url('/img/mage.png'); }
+            .class-priest { background-color: rgb(96%,96%,96%); background-image: url('/img/priest.png'); border: 1px solid #DDDDDD; }
+            .class-rogue { background-color: rgb(100%,96%,41%); background-image: url('/img/rogue.png'); }
+            .class-shaman { background-color: rgb(14%,35%,100%); background-image: url('/img/shaman.png'); }
+            .class-warlock { background-color: rgb(58%,51%,79%); background-image: url('/img/warlock.png'); }
+            .class-warrior { background-color: rgb(78%,61%,43%); background-image: url('/img/warrior.png'); }
         </style>
     </head>
     <body>
@@ -39,8 +58,13 @@
                 </div>
             </div>
             <div class="row">
-                <div id="raidInfo" class="col-sm-6">
+                <div id="raidInfo" class="col-sm-12">
                     <span class="h3 title"></span> <span class="badge badge-secondary pull-right"></span>
+                </div>
+                <div id="raidData" class="col-sm-12">
+                    <h5>Players</h5>
+                    <div id="raidPlayers" class="row mt-2">
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -61,6 +85,7 @@
             $( document ).ready(function() {
                 $('#fightInfo').DataTable();
                 $('#fightInfo_wrapper').hide();
+                $('#raidData').hide();
                 $.ajax({
                     url: '/api/raids'
                 }).done(function(data) {
@@ -84,19 +109,33 @@
                         let dateText = date.toLocaleDateString("en-GB")
                         $('#raidInfo .title').text(`${dateText}: ${data.data.title}`)
                         $('#raidInfo .badge').text(`${data.data.code}`)
+                        $fightEle.append( `<a href='#' class='fight list-group-item' data-code='${data.data.code}' data-encounter='summary'>Summary</a>` );
                         for (const [key, value] of Object.entries(data.data.fights)) {
                             $fightEle.append( `<a href='#' class='fight list-group-item' data-code='${data.data.code}' data-encounter='${value.encounterID}' data-start-time='${value.startTime}' data-end-time='${value.endTime}'>${value.id}: ${lookupBossName(value.encounterID)}</a>` );
                         }
+                        let $raidPlayers = $('#raidPlayers');
+                        for (const [key, value] of Object.entries(data.data.rankedCharacters)) {
+                            $raidPlayers.append( `<div class='text-center class-block class-${getClassName(value.classID).toLowerCase()}' >${value.name}</div>` );
+                        }
+                        $('#raidData').show();
                         $('#selectFightButton').show();
                     });
                 });
 
                 $('#selectFight').on('click', 'a', function() {
+                    $('#raidData').hide();
                     let encounterID = $(this).data('encounter');
+                    if ('summary' === encounterID) {
+                        $('#fightTitle').hide();
+                        $('#fightInfo_wrapper').hide();
+                        $('#raidData').show();
+                        return;
+                    }
                     $.ajax({
                         url: '/api/raids/' + $(this).data('code') + '/' + $(this).data('encounter') + '/' + $(this).data('startTime') + '/' + $(this).data('endTime')
                     }).done(function(data) {
                         $('#fightTitle .title').text(`Encounter: ${lookupBossName(encounterID)}`);
+                        $('#fightTitle').show();
                         let $fightInfo = $('#fightInfo').DataTable();
                         $fightInfo.clear();
                         for (const [key, value] of Object.entries(data.data.players)) {
@@ -150,6 +189,34 @@
                             return 'C\'thun';
                     }
                     return 'Unknown Boss';
+                }
+
+                function getClassName(classID) {
+                    switch (classID) {
+                        case 1:
+                            return 'Unknown-1';
+                        case 2:
+                            return 'Druid';
+                        case 3:
+                            return 'Hunter';
+                        case 4:
+                            return 'Mage';
+                        case 5:
+                            return 'Unknown-5';
+                        case 6:
+                            return 'Unknown-6';
+                        case 7:
+                            return 'Priest';
+                        case 8:
+                            return 'Rogue';
+                        case 9:
+                            return 'Shaman';
+                        case 10:
+                            return 'Warlock';
+                        case 11:
+                            return 'Warrior';
+                    }
+                    return 'Unknown';
                 }
             });
 
