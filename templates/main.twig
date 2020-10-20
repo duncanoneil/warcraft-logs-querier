@@ -69,7 +69,7 @@
                     for (const [key, value] of Object.entries(data.data)) {
                         let date = new Date(value.startTime);
                         let dateText = date.toLocaleDateString("en-GB")
-                        $raidEle.append( `<a class='raid list-group-item' data-code='${value.code}'>${dateText}: ${value.title}</a>` );
+                        $raidEle.append( `<a href='#' class='raid list-group-item' data-code='${value.code}'>${dateText}: ${value.title}</a>` );
                     }
                     $('#selectRaidButton').show();
                 });
@@ -85,7 +85,7 @@
                         $('#raidInfo .title').text(`${dateText}: ${data.data.title}`)
                         $('#raidInfo .badge').text(`${data.data.code}`)
                         for (const [key, value] of Object.entries(data.data.fights)) {
-                            $fightEle.append( `<a href='#' class='fight list-group-item' data-code='${data.data.code}' data-encounter='${value.encounterID}' data-start-time='${value.startTime}' data-end-time='${value.endTime}'>${value.id}: ${value.encounterID}</a>` );
+                            $fightEle.append( `<a href='#' class='fight list-group-item' data-code='${data.data.code}' data-encounter='${value.encounterID}' data-start-time='${value.startTime}' data-end-time='${value.endTime}'>${value.id}: ${lookupBossName(value.encounterID)}</a>` );
                         }
                         $('#selectFightButton').show();
                     });
@@ -96,7 +96,7 @@
                     $.ajax({
                         url: '/api/raids/' + $(this).data('code') + '/' + $(this).data('encounter') + '/' + $(this).data('startTime') + '/' + $(this).data('endTime')
                     }).done(function(data) {
-                        $('#fightTitle .title').text(`Encounter: ${encounterID}`);
+                        $('#fightTitle .title').text(`Encounter: ${lookupBossName(encounterID)}`);
                         let $fightInfo = $('#fightInfo').DataTable();
                         $fightInfo.clear();
                         for (const [key, value] of Object.entries(data.data.players)) {
@@ -109,6 +109,48 @@
                         $('#fightInfo_wrapper').show();
                     });
                 });
+
+                function lookupBossName(encounterID) {
+                    switch (encounterID) {
+                        //BWL Bosses
+                        case 610:
+                            return 'Razorgore the Untamed';
+                        case 611:
+                            return 'Vaelastrasz the Corrupt';
+                        case 612:
+                            return 'Broodlord Lashlayer';
+                        case 613:
+                            return 'Firemaw';
+                        case 614:
+                            return 'Ebonroc';
+                        case 615:
+                            return 'Flamegor';
+                        case 616:
+                            return 'Chromaggus';
+                        case 617:
+                            return 'Nefarian';
+                        //AQ40 Bosses
+                        case 709:
+                            return 'The Prophet Skeram';
+                        case 710:
+                            return 'Silithid Royalty';
+                        case 711:
+                            return 'Battleguard Sartura';
+                        case 712:
+                            return 'Fankriss the Unyielding';
+                        case 713:
+                            return 'Viscidus';
+                        case 714:
+                            return 'Princess Huhuran';
+                        case 715:
+                            return 'Twin Emperors';
+                        case 716:
+                            return 'Ouro';
+                        case 717:
+                            return 'C\'thun';
+                    }
+                    return 'Unknown Boss';
+                }
             });
 
         </script>
